@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+dist/
+packages/ui/tsconfig.tsbuildinfo
+*.tsbuildinfo
+
+# Environment / secrets
+.env
+.env.local
+.env.*.local
+
+# Supabase local dev
+supabase/.branches/
+supabase/.temp/
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json

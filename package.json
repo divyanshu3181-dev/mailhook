@@ -1,0 +1,20 @@
+{
+  "name": "mailhook",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Instant email-to-webhook relay using IMAP IDLE. Watches your existing inboxes and POSTs matching emails to webhooks.",
+  "scripts": {
+    "dev": "pnpm --parallel --filter \"./packages/*\" dev",
+    "dev:server": "pnpm --filter @mailhook/server dev",
+    "dev:ui": "pnpm --filter @mailhook/ui dev",
+    "build": "pnpm --filter @mailhook/ui build && pnpm --filter @mailhook/server build",
+    "build:server": "pnpm --filter @mailhook/server build",
+    "build:ui": "pnpm --filter @mailhook/ui build",
+    "start": "node packages/server/dist/index.js",
+    "typecheck": "pnpm --filter \"./packages/*\" typecheck"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "pnpm@9.12.0"
+}
