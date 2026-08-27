@@ -3,7 +3,7 @@
 # ---------------------------------------------------------------------------
 # Stage 1: Build the UI
 # ---------------------------------------------------------------------------
-FROM node:20-alpine AS ui-builder
+FROM node:22-alpine AS ui-builder
 WORKDIR /app
 RUN corepack enable && corepack prepare pnpm@9.12.0 --activate
 
@@ -25,7 +25,7 @@ RUN pnpm --filter @mailhook/ui build
 # ---------------------------------------------------------------------------
 # Stage 2: Build the server
 # ---------------------------------------------------------------------------
-FROM node:20-alpine AS server-builder
+FROM node:22-alpine AS server-builder
 WORKDIR /app
 RUN corepack enable && corepack prepare pnpm@9.12.0 --activate
 
@@ -40,7 +40,7 @@ RUN pnpm --filter @mailhook/server build
 # ---------------------------------------------------------------------------
 # Stage 3: Production image
 # ---------------------------------------------------------------------------
-FROM node:20-alpine AS production
+FROM node:22-alpine AS production
 WORKDIR /app
 ENV NODE_ENV=production
 RUN corepack enable && corepack prepare pnpm@9.12.0 --activate
