@@ -1,5 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom';
-import { clearApiKey } from '../lib/api';
+import { supabase } from '../lib/supabase';
 
 const NAV = [
   { to: '/', label: 'Dashboard', end: true },
@@ -39,8 +39,7 @@ export function Layout() {
         </nav>
         <button
           onClick={() => {
-            clearApiKey();
-            window.location.reload();
+            void supabase?.auth.signOut();
           }}
           className="m-3 rounded-lg px-3 py-2 text-left text-sm text-slate-500 hover:bg-slate-100"
         >

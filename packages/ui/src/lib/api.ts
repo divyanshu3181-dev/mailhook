@@ -8,19 +8,7 @@ import type {
   Pagination,
 } from './types';
 
-const KEY_STORAGE = 'mailhook_api_key';
-
-export function getApiKey(): string {
-  return localStorage.getItem(KEY_STORAGE) ?? '';
-}
-
-export function setApiKey(key: string): void {
-  localStorage.setItem(KEY_STORAGE, key);
-}
-
-export function clearApiKey(): void {
-  localStorage.removeItem(KEY_STORAGE);
-}
+import { getAccessToken, supabase } from './supabase';
 
 export class ApiError extends Error {
   constructor(
@@ -33,12 +21,19 @@ export class ApiError extends Error {
 
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   const headers = new Headers(init.headers);
-  headers.set('Authorization', `Bearer ${getApiKey()}`);
+  const token = await getAccessToken();
+  if (token) headers.set('Authorization', `Bearer ${token}`);
   if (init.body && !headers.has('Content-Type')) {
     headers.set('Content-Type', 'application/json');
   }
 
   const res = await fetch(`/api${path}`, { ...init, headers });
+
+  // A 401 means the session is gone/expired — sign out so the app shows login.
+  if (res.status === 401) {
+    await supabase?.auth.signOut();
+  }
+
   const text = await res.text();
   const data = text ? JSON.parse(text) : null;
 

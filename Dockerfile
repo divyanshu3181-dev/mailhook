@@ -7,6 +7,13 @@ FROM node:20-alpine AS ui-builder
 WORKDIR /app
 RUN corepack enable && corepack prepare pnpm@9.12.0 --activate
 
+# Supabase auth is baked into the UI bundle at build time (Vite inlines VITE_*).
+# Pass these as build args on Railway (Variables are exposed to the build).
+ARG VITE_SUPABASE_URL
+ARG VITE_SUPABASE_ANON_KEY
+ENV VITE_SUPABASE_URL=$VITE_SUPABASE_URL
+ENV VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY
+
 COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
 COPY packages/ui/package.json ./packages/ui/
 COPY packages/server/package.json ./packages/server/

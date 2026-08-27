@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import { ApiKeyGate } from './components/ApiKeyGate';
-import { getApiKey, systemApi } from './lib/api';
+import { supabase } from './lib/supabase';
 import { Dashboard } from './pages/Dashboard';
 import { Accounts } from './pages/Accounts';
 import { AccountDetail } from './pages/AccountDetail';
@@ -15,14 +15,19 @@ export function App() {
   const [authed, setAuthed] = useState<boolean | null>(null);
 
   useEffect(() => {
-    if (!getApiKey()) {
+    if (!supabase) {
       setAuthed(false);
       return;
     }
-    systemApi
-      .health()
-      .then(() => setAuthed(true))
-      .catch(() => setAuthed(false));
+    // Initial session check.
+    supabase.auth.getSession().then(({ data }) => {
+      setAuthed(Boolean(data.session));
+    });
+    // Keep the gate in sync with sign-in / sign-out / token refresh.
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      setAuthed(Boolean(session));
+    });
+    return () => sub.subscription.unsubscribe();
   }, []);
 
   if (authed === null) {

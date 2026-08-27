@@ -5,7 +5,7 @@ import { existsSync } from 'node:fs';
 import fastifyStatic from '@fastify/static';
 import { config } from '../config.js';
 import { logger } from '../logger.js';
-import { requireApiKey } from './auth.js';
+import { requireSupabaseUser } from './auth.js';
 import { registerAccountRoutes } from './accounts.routes.js';
 import { registerRuleRoutes } from './rules.routes.js';
 import { registerLogRoutes } from './logs.routes.js';
@@ -38,7 +38,7 @@ export async function registerApi(app: FastifyInstance): Promise<void> {
   // Auth-protected admin API.
   await app.register(
     async (api) => {
-      api.addHook('preHandler', requireApiKey);
+      api.addHook('preHandler', requireSupabaseUser);
       await registerAccountRoutes(api);
       await registerRuleRoutes(api);
       await registerLogRoutes(api);

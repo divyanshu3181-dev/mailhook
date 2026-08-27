@@ -47,6 +47,11 @@ export interface AppConfig {
   supabase: {
     url: string;
     serviceRoleKey: string;
+    jwtSecret?: string;
+  };
+  auth: {
+    /** Lowercased allowlist of emails permitted to sign in. Empty = deny all. */
+    allowlist: string[];
   };
   encryption: {
     key?: string; // 64 hex chars; required (see validateConfig)
@@ -91,6 +96,13 @@ export const config: AppConfig = {
   supabase: {
     url: envStr('SUPABASE_URL', ''),
     serviceRoleKey: envStr('SUPABASE_SERVICE_ROLE_KEY', ''),
+    jwtSecret: envOptional('SUPABASE_JWT_SECRET'),
+  },
+  auth: {
+    allowlist: envStr('AUTH_ALLOWLIST', '')
+      .split(',')
+      .map((e) => e.trim().toLowerCase())
+      .filter(Boolean),
   },
   encryption: {
     key: envOptional('ENCRYPTION_KEY'),
@@ -147,6 +159,18 @@ export function validateConfig(): string[] {
     );
   } else if (!/^[0-9a-fA-F]{64}$/.test(config.encryption.key)) {
     problems.push('ENCRYPTION_KEY must be exactly 64 hexadecimal characters (32 bytes)');
+  }
+  if (!config.supabase.jwtSecret) {
+    problems.push(
+      'SUPABASE_JWT_SECRET is required for admin authentication ' +
+        '(Supabase dashboard → Settings → API → JWT Secret)'
+    );
+  }
+  if (config.auth.allowlist.length === 0) {
+    problems.push(
+      'AUTH_ALLOWLIST is empty — no one could sign in. Set it to a comma-separated ' +
+        'list of allowed admin emails, e.g. AUTH_ALLOWLIST=you@example.com'
+    );
   }
   return problems;
 }

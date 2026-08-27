@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { systemApi, getApiKey } from '../lib/api';
+import { systemApi } from '../lib/api';
+import { supabase } from '../lib/supabase';
 import type { SettingsInfo, HealthInfo } from '../lib/types';
 
 function formatUptime(seconds: number): string {
@@ -13,7 +14,7 @@ export function Settings() {
   const [settings, setSettings] = useState<SettingsInfo | null>(null);
   const [health, setHealth] = useState<HealthInfo | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [showKey, setShowKey] = useState(false);
+  const [email, setEmail] = useState<string>('');
 
   useEffect(() => {
     Promise.all([systemApi.settings(), systemApi.health()])
@@ -24,8 +25,9 @@ export function Settings() {
       .catch((err) => setError((err as Error).message));
   }, []);
 
-  const apiKey = getApiKey();
-  const maskedKey = apiKey ? `${apiKey.slice(0, 4)}${'•'.repeat(Math.max(apiKey.length - 4, 0))}` : '';
+  useEffect(() => {
+    supabase?.auth.getUser().then(({ data }) => setEmail(data.user?.email ?? ''));
+  }, []);
 
   return (
     <div>
@@ -61,26 +63,17 @@ export function Settings() {
           />
         </Card>
 
-        <Card title="API key">
-          <div className="flex items-center gap-2">
-            <code className="flex-1 overflow-x-auto rounded bg-slate-100 px-3 py-2 text-xs text-slate-700">
-              {showKey ? apiKey : maskedKey || '(none)'}
-            </code>
-            <button
-              onClick={() => setShowKey((s) => !s)}
-              className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50"
-            >
-              {showKey ? 'Hide' : 'Show'}
-            </button>
-            <button
-              onClick={() => navigator.clipboard.writeText(apiKey)}
-              className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50"
-            >
-              Copy
-            </button>
-          </div>
+        <Card title="Signed in as">
+          <Row label="Email" value={email || '—'} />
+          <button
+            type="button"
+            onClick={() => void supabase?.auth.signOut()}
+            className="mt-3 rounded-lg border border-slate-200 px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50"
+          >
+            Sign out
+          </button>
           <p className="mt-2 text-xs text-slate-400">
-            Stored in your browser. Sent as <code>Authorization: Bearer</code> on every request.
+            Authenticated via Supabase. Your session token authorizes every request.
           </p>
         </Card>
       </div>
